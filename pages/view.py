@@ -1,6 +1,9 @@
 ﻿import streamlit as st
 import pandas as pd
 import numpy as np
+from inspect import signature
+import pandas as pd
+import datetime
 
 st.markdown(
     """
@@ -13,6 +16,18 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
+# Initialiser session_state si nécessaire
+if "df" not in st.session_state:
+    st.session_state.df = pd.DataFrame()
+if "new_row" not in st.session_state:
+    st.session_state.new_row = {}
+if "col_names" not in st.session_state:
+    st.session_state.col_names = []
+if "show_download_buttons" not in st.session_state:
+    st.session_state.show_download_buttons = False
+if "show_signature_button" not in st.session_state:
+    st.session_state.show_signature_button = False
 
 #col1, col2, col3 = st.columns(3)
 
