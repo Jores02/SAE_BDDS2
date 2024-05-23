@@ -28,6 +28,15 @@ if "show_download_buttons" not in st.session_state:
     st.session_state.show_download_buttons = False
 if "show_signature_button" not in st.session_state:
     st.session_state.show_signature_button = False
+    
+    # Demander le nom de la nouvelle colonne
+new_col_name = st.text_input("Entrez le nom de la nouvelle colonne")
+if new_col_name:  # Vérifier si le nom de la colonne n'est pas vide
+    if st.button("Ajouter la colonne"):
+        st.session_state.col_names.append(new_col_name)
+        # Ajouter la nouvelle colonne au DataFrame existant
+        if new_col_name not in st.session_state.df.columns:
+            st.session_state.df[new_col_name] = pd.Series()
 
 #col1, col2, col3 = st.columns(3)
 
