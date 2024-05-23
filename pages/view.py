@@ -28,6 +28,10 @@ if "show_download_buttons" not in st.session_state:
     st.session_state.show_download_buttons = False
 if "show_signature_button" not in st.session_state:
     st.session_state.show_signature_button = False
+
+# Afficher un selectbox avec toutes les colonnes du DataFrame
+all_columns = st.session_state.df.columns.tolist()
+selected_column = st.selectbox("Sélectionnez une colonne à afficher", all_columns)
     
     # Demander le nom de la nouvelle colonne
 col_name = st.text_input("Entrez le nom de la colonne à afficher")
