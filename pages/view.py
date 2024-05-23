@@ -30,13 +30,15 @@ if "show_signature_button" not in st.session_state:
     st.session_state.show_signature_button = False
     
     # Demander le nom de la nouvelle colonne
-new_col_name = st.text_input("Entrez le nom de la nouvelle colonne")
-if new_col_name:  # Vérifier si le nom de la colonne n'est pas vide
-    if st.button("Ajouter la colonne"):
-        st.session_state.col_names.append(new_col_name)
-        # Ajouter la nouvelle colonne au DataFrame existant
-        if new_col_name not in st.session_state.df.columns:
-            st.session_state.df[new_col_name] = pd.Series()
+col_name = st.text_input("Entrez le nom de la colonne à afficher")
+if col_name:  # Vérifier si le nom de la colonne n'est pas vide
+   if col_name:
+    # Vérifier si la colonne existe dans le DataFrame
+    if col_name in st.session_state.df.columns:
+        st.write(f"Valeurs de la colonne {col_name} :")
+        st.dataframe(st.session_state.df[[col_name]])
+    else:
+        st.write(f"La colonne '{col_name}' n'existe pas dans le DataFrame.")
 
 #col1, col2, col3 = st.columns(3)
 
