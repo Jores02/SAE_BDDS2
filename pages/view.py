@@ -55,6 +55,11 @@ if col_name:  # Vérifier si le nom de la colonne n'est pas vide
             # Si la colonne est textuelle, permettre à l'utilisateur de rechercher une correspondance partielle
             search_term = st.text_input(f"Termes à rechercher dans {col_name}")
             st.session_state.filtered_df = st.session_state.df[st.session_state.df[col_name].str.contains(search_term, case=False, na=False)]
+            
+            # Ajouter un champ pour rechercher par lettres de départ
+            start_letters = st.text_input(f"Commence par (pour {col_name})")
+            if start_letters:
+                st.session_state.filtered_df = st.session_state.filtered_df[st.session_state.filtered_df[col_name].str.startswith(start_letters, na=False)]
         
         # Afficher le DataFrame filtré
         st.write(f"Données filtrées selon les critères pour {col_name} :")
