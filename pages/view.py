@@ -25,7 +25,7 @@ if uploaded_file is not None:
         st.write('### DataFrame original :')
         st.dataframe(df)
 
-        st.write('### Recherches :')
+        st.write('### Recherches et Filtrage :')
 
         filtered_df = df.copy()
 
@@ -33,20 +33,19 @@ if uploaded_file is not None:
         all_columns = df.columns.tolist()
 
         # Stockage de la colonne sélectionnée pour la recherche simple
-        selected_column_simple = st.sidebar.selectbox("Sélectionnez une colonne à afficher (recherche simple)", all_columns)
+        selected_column_simple = st.selectbox("Sélectionnez une colonne à afficher (recherche simple)", all_columns)
 
         # Recherche simple
-        with st.expander("Recherches simples", expanded=False):
-            st.write("#### Recherches simples")
-
-            if selected_column_simple:
+        if selected_column_simple:
+            with st.expander("Recherche Simple", expanded=True):
+                st.write("#### Recherche Simple")
                 # Afficher les valeurs de la colonne sélectionnée
                 st.write(f"Valeurs de la colonne {selected_column_simple} :")
                 st.dataframe(df[[selected_column_simple]])
 
                 # Option de recherche simple dans une colonne textuelle
                 if df[selected_column_simple].dtype == 'object':
-                    search_term = st.text_input(f"Rechercher dans la colonne {selected_column_simple}", key="simple_search_term")
+                    search_term = st.text_input(f"Rechercher dans la colonne {selected_column_simple}")
                     if search_term:
                         filtered_df = df[df[selected_column_simple].str.contains(search_term, case=False, na=False)]
                         st.write(f"Résultats de la recherche pour '{search_term}' dans la colonne {selected_column_simple} :")
@@ -56,22 +55,21 @@ if uploaded_file is not None:
         selected_column_advanced = st.selectbox("Sélectionnez une colonne à afficher (recherche avancée)", all_columns, index=all_columns.index(selected_column_simple) if selected_column_simple else 0)
 
         # Recherche avancée
-        with st.expander("Recherches avancées", expanded=False):
-            st.write("#### Recherches avancées")
-
-            if selected_column_advanced:
+        if selected_column_advanced:
+            with st.expander("Recherche Avancée", expanded=True):
+                st.write("#### Recherche Avancée")
                 st.write(f"Valeurs de la colonne {selected_column_advanced} :")
                 st.dataframe(df[[selected_column_advanced]])
 
                 # Ajouter des critères de sélection supplémentaires
                 if df[selected_column_advanced].dtype in ['int64', 'float64']:
                     # Si la colonne est numérique, permettre à l'utilisateur de définir une plage de valeurs
-                    min_val = st.number_input(f"Valeur minimum pour {selected_column_advanced}", value=float(df[selected_column_advanced].min()), key="min_val")
-                    max_val = st.number_input(f"Valeur maximum pour {selected_column_advanced}", value=float(df[selected_column_advanced].max()), key="max_val")
+                    min_val = st.number_input(f"Valeur minimum pour {selected_column_advanced}", value=float(df[selected_column_advanced].min()))
+                    max_val = st.number_input(f"Valeur maximum pour {selected_column_advanced}", value=float(df[selected_column_advanced].max()))
                     filtered_df = df[(df[selected_column_advanced] >= min_val) & (df[selected_column_advanced] <= max_val)]
                 else:
                     # Si la colonne est textuelle, permettre à l'utilisateur de rechercher une correspondance partielle
-                    search_term = st.text_input(f"Termes à rechercher dans {selected_column_advanced}", key="adv_search_term")
+                    search_term = st.text_input(f"Termes à rechercher dans {selected_column_advanced}")
                     if search_term:
                         filtered_df = df[df[selected_column_advanced].str.contains(search_term, case=False, na=False)]
 
@@ -80,8 +78,8 @@ if uploaded_file is not None:
                 st.dataframe(filtered_df)
 
         # Options pour télécharger
-        st.sidebar.write('### Télécharger les données filtrées :')
-        with st.sidebar.expander("Options de téléchargement", expanded=False):
+        st.write('### Télécharger les données filtrées :')
+        with st.expander("Options de téléchargement", expanded=True):
             st.markdown(
                 """
                 <style>
