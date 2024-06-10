@@ -86,10 +86,11 @@ if uploaded_file is not None:
                 .small-button button {
                     font-size: 0.8em !important;
                     padding: 0.25em 0.5em !important;
+                    margin-right: 10px !important;
                 }
                 .horizontal {
                     display: flex;
-                    justify-content: space-around;
+                    align-items: center;
                 }
                 </style>
                 """,
