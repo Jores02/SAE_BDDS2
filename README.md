@@ -12,4 +12,4 @@ docker run -p 8501:8501 tst_app
 
 ### Exécution en ligne
 
-Vous pouvez visualiser le site en ligne ici : https://unicron03-datasetapp.streamlit.app/
+Vous pouvez visualiser le site en ligne ici : https://amena-datasetapp.streamlit.app/
