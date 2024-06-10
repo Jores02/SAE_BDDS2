@@ -56,30 +56,26 @@ if uploaded_file is not None:
 
             # Sélection de la colonne à afficher
             selected_column = st.selectbox("Sélectionnez une colonne à afficher (recherche avancée)", all_columns, key="adv_selectbox")
-            col_name = st.text_input("Entrez le nom de la colonne à afficher", value=selected_column, key="adv_text_input")
 
-            if col_name:
-                if col_name in df.columns:
-                    st.write(f"Valeurs de la colonne {col_name} :")
-                    st.dataframe(df[[col_name]])
+            if selected_column:
+                st.write(f"Valeurs de la colonne {selected_column} :")
+                st.dataframe(df[[selected_column]])
 
-                    # Ajouter des critères de sélection supplémentaires
-                    if df[col_name].dtype in ['int64', 'float64']:
-                        # Si la colonne est numérique, permettre à l'utilisateur de définir une plage de valeurs
-                        min_val = st.number_input(f"Valeur minimum pour {col_name}", value=float(df[col_name].min()), key="min_val")
-                        max_val = st.number_input(f"Valeur maximum pour {col_name}", value=float(df[col_name].max()), key="max_val")
-                        filtered_df = df[(df[col_name] >= min_val) & (df[col_name] <= max_val)]
-                    else:
-                        # Si la colonne est textuelle, permettre à l'utilisateur de rechercher une correspondance partielle
-                        search_term = st.text_input(f"Termes à rechercher dans {col_name}", key="adv_search_term")
-                        if search_term:
-                            filtered_df = df[df[col_name].str.contains(search_term, case=False, na=False)]
-
-                    # Afficher le DataFrame filtré
-                    st.write(f"Données filtrées selon les critères pour {col_name} :")
-                    st.dataframe(filtered_df)
+                # Ajouter des critères de sélection supplémentaires
+                if df[selected_column].dtype in ['int64', 'float64']:
+                    # Si la colonne est numérique, permettre à l'utilisateur de définir une plage de valeurs
+                    min_val = st.number_input(f"Valeur minimum pour {selected_column}", value=float(df[selected_column].min()), key="min_val")
+                    max_val = st.number_input(f"Valeur maximum pour {selected_column}", value=float(df[selected_column].max()), key="max_val")
+                    filtered_df = df[(df[selected_column] >= min_val) & (df[selected_column] <= max_val)]
                 else:
-                    st.write(f"La colonne '{col_name}' n'existe pas dans le DataFrame.")
+                    # Si la colonne est textuelle, permettre à l'utilisateur de rechercher une correspondance partielle
+                    search_term = st.text_input(f"Termes à rechercher dans {selected_column}", key="adv_search_term")
+                    if search_term:
+                        filtered_df = df[df[selected_column].str.contains(search_term, case=False, na=False)]
+
+                # Afficher le DataFrame filtré
+                st.write(f"Données filtrées selon les critères pour {selected_column} :")
+                st.dataframe(filtered_df)
 
         # Options pour télécharger
         st.write('### Télécharger les données filtrées :')
