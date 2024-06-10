@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 
-# Supposons que le DataFrame est déjà initialisé avec des données
 # Initialisation de st.session_state.df pour l'exemple
 if "df" not in st.session_state:
     st.session_state.df = pd.DataFrame({
@@ -18,7 +17,6 @@ selected_column = st.selectbox("Sélectionnez une colonne à afficher", all_colu
 col_name = st.text_input("Entrez le nom de la colonne à afficher", value=selected_column)
 
 if col_name:
-    # Vérifier si la colonne existe dans le DataFrame
     if col_name in st.session_state.df.columns:
         st.write(f"Valeurs de la colonne {col_name} :")
         
@@ -26,7 +24,7 @@ if col_name:
         st.dataframe(st.session_state.df[[col_name]])
         
         # Ajouter des critères de sélection supplémentaires
-        if st.session_state.df[col_name].dtype == 'int64' or st.session_state.df[col_name].dtype == 'float64':
+        if st.session_state.df[col_name].dtype in ['int64', 'float64']:
             # Si la colonne est numérique, permettre à l'utilisateur de définir une plage de valeurs
             min_val = st.number_input(f"Valeur minimum pour {col_name}", value=float(st.session_state.df[col_name].min()))
             max_val = st.number_input(f"Valeur maximum pour {col_name}", value=float(st.session_state.df[col_name].max()))
