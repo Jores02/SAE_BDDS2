@@ -29,57 +29,59 @@ if uploaded_file is not None:
 
         filtered_df = df.copy()
 
-        # Recherches simples
-        with st.expander("Recherches simples", expanded=False):
+        # Colonnes disponibles pour la sélection
+        all_columns = df.columns.tolist()
+
+        # Stockage de la colonne sélectionnée pour la recherche simple
+        selected_column_simple = st.sidebar.selectbox("Sélectionnez une colonne à afficher (recherche simple)", all_columns)
+
+        # Recherche simple
+        with st.sidebar.expander("Recherches simples", expanded=True):
             st.write("#### Recherches simples")
 
-            # Afficher un selectbox avec toutes les colonnes du DataFrame
-            all_columns = df.columns.tolist()
-            selected_column = st.selectbox("Sélectionnez une colonne à afficher", all_columns, key="simple_selectbox")
-
-            if selected_column:
+            if selected_column_simple:
                 # Afficher les valeurs de la colonne sélectionnée
-                st.write(f"Valeurs de la colonne {selected_column} :")
-                st.dataframe(df[[selected_column]])
+                st.write(f"Valeurs de la colonne {selected_column_simple} :")
+                st.dataframe(df[[selected_column_simple]])
 
                 # Option de recherche simple dans une colonne textuelle
-                if df[selected_column].dtype == 'object':
-                    search_term = st.text_input(f"Rechercher dans la colonne {selected_column}", key="simple_search_term")
+                if df[selected_column_simple].dtype == 'object':
+                    search_term = st.text_input(f"Rechercher dans la colonne {selected_column_simple}")
                     if search_term:
-                        filtered_df = df[df[selected_column].str.contains(search_term, case=False, na=False)]
-                        st.write(f"Résultats de la recherche pour '{search_term}' dans la colonne {selected_column} :")
+                        filtered_df = df[df[selected_column_simple].str.contains(search_term, case=False, na=False)]
+                        st.write(f"Résultats de la recherche pour '{search_term}' dans la colonne {selected_column_simple} :")
                         st.dataframe(filtered_df)
 
-        # Recherches avancées
-        with st.expander("Recherches avancées", expanded=False):
+        # Stockage de la colonne sélectionnée pour la recherche avancée
+        selected_column_advanced = st.selectbox("Sélectionnez une colonne à afficher (recherche avancée)", all_columns, index=all_columns.index(selected_column_simple) if selected_column_simple else 0)
+
+        # Recherche avancée
+        with st.expander("Recherches avancées", expanded=True):
             st.write("#### Recherches avancées")
 
-            # Sélection de la colonne à afficher
-            selected_column = st.selectbox("Sélectionnez une colonne à afficher (recherche avancée)", all_columns, key="adv_selectbox")
-
-            if selected_column:
-                st.write(f"Valeurs de la colonne {selected_column} :")
-                st.dataframe(df[[selected_column]])
+            if selected_column_advanced:
+                st.write(f"Valeurs de la colonne {selected_column_advanced} :")
+                st.dataframe(df[[selected_column_advanced]])
 
                 # Ajouter des critères de sélection supplémentaires
-                if df[selected_column].dtype in ['int64', 'float64']:
+                if df[selected_column_advanced].dtype in ['int64', 'float64']:
                     # Si la colonne est numérique, permettre à l'utilisateur de définir une plage de valeurs
-                    min_val = st.number_input(f"Valeur minimum pour {selected_column}", value=float(df[selected_column].min()), key="min_val")
-                    max_val = st.number_input(f"Valeur maximum pour {selected_column}", value=float(df[selected_column].max()), key="max_val")
-                    filtered_df = df[(df[selected_column] >= min_val) & (df[selected_column] <= max_val)]
+                    min_val = st.number_input(f"Valeur minimum pour {selected_column_advanced}", value=float(df[selected_column_advanced].min()))
+                    max_val = st.number_input(f"Valeur maximum pour {selected_column_advanced}", value=float(df[selected_column_advanced].max()))
+                    filtered_df = df[(df[selected_column_advanced] >= min_val) & (df[selected_column_advanced] <= max_val)]
                 else:
                     # Si la colonne est textuelle, permettre à l'utilisateur de rechercher une correspondance partielle
-                    search_term = st.text_input(f"Termes à rechercher dans {selected_column}", key="adv_search_term")
+                    search_term = st.text_input(f"Termes à rechercher dans {selected_column_advanced}")
                     if search_term:
-                        filtered_df = df[df[selected_column].str.contains(search_term, case=False, na=False)]
+                        filtered_df = df[df[selected_column_advanced].str.contains(search_term, case=False, na=False)]
 
                 # Afficher le DataFrame filtré
-                st.write(f"Données filtrées selon les critères pour {selected_column} :")
+                st.write(f"Données filtrées selon les critères pour {selected_column_advanced} :")
                 st.dataframe(filtered_df)
 
         # Options pour télécharger
-        st.write('### Télécharger les données filtrées :')
-        with st.expander("Options de téléchargement", expanded=False):
+        st.sidebar.write('### Télécharger les données filtrées :')
+        with st.sidebar.expander("Options de téléchargement", expanded=False):
             st.markdown(
                 """
                 <style>
