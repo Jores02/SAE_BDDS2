@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import json
 import io
-from datetime import datetime
 
 # Fonction pour lire les fichiers
 def load_file(file):
@@ -17,13 +16,6 @@ def load_file(file):
         st.error("Format de fichier non pris en charge!")
         return None
 
-# Fonction pour s'assurer que la signature est à la fin du DataFrame
-def ensure_signature_at_end(df):
-    if 'Signature' in df.columns:
-        columns = [col for col in df.columns if col != 'Signature'] + ['Signature']
-        df = df[columns]
-    return df
-
 # Téléchargement du fichier
 uploaded_file = st.file_uploader("Choisissez un fichier JSON, CSV ou Parquet", type=["json", "csv", "parquet"])
 
@@ -35,6 +27,8 @@ if uploaded_file is not None:
 
         st.write('### Recherches :')
 
+        filtered_df = df.copy()
+
         # Recherches simples
         with st.expander("Recherches simples", expanded=False):
             st.write("#### Recherches simples")
@@ -43,17 +37,18 @@ if uploaded_file is not None:
             all_columns = df.columns.tolist()
             selected_column = st.selectbox("Sélectionnez une colonne à afficher", all_columns, key="simple_selectbox")
 
-            # Afficher les valeurs de la colonne sélectionnée
-            st.write(f"Valeurs de la colonne {selected_column} :")
-            st.dataframe(df[[selected_column]])
+            if selected_column:
+                # Afficher les valeurs de la colonne sélectionnée
+                st.write(f"Valeurs de la colonne {selected_column} :")
+                st.dataframe(df[[selected_column]])
 
-            # Option de recherche simple dans une colonne textuelle
-            if df[selected_column].dtype == 'object':
-                search_term = st.text_input(f"Rechercher dans la colonne {selected_column}", key="simple_search_term")
-                if search_term:
-                    filtered_df = df[df[selected_column].str.contains(search_term, case=False, na=False)]
-                    st.write(f"Résultats de la recherche pour '{search_term}' dans la colonne {selected_column} :")
-                    st.dataframe(filtered_df)
+                # Option de recherche simple dans une colonne textuelle
+                if df[selected_column].dtype == 'object':
+                    search_term = st.text_input(f"Rechercher dans la colonne {selected_column}", key="simple_search_term")
+                    if search_term:
+                        filtered_df = df[df[selected_column].str.contains(search_term, case=False, na=False)]
+                        st.write(f"Résultats de la recherche pour '{search_term}' dans la colonne {selected_column} :")
+                        st.dataframe(filtered_df)
 
         # Recherches avancées
         with st.expander("Recherches avancées", expanded=False):
@@ -77,7 +72,8 @@ if uploaded_file is not None:
                     else:
                         # Si la colonne est textuelle, permettre à l'utilisateur de rechercher une correspondance partielle
                         search_term = st.text_input(f"Termes à rechercher dans {col_name}", key="adv_search_term")
-                        filtered_df = df[df[col_name].str.contains(search_term, case=False, na=False)]
+                        if search_term:
+                            filtered_df = df[df[col_name].str.contains(search_term, case=False, na=False)]
 
                     # Afficher le DataFrame filtré
                     st.write(f"Données filtrées selon les critères pour {col_name} :")
@@ -86,7 +82,7 @@ if uploaded_file is not None:
                     st.write(f"La colonne '{col_name}' n'existe pas dans le DataFrame.")
 
         # Options pour télécharger
-        st.write('### Télécharger les modifications :')
+        st.write('### Télécharger les données filtrées :')
         with st.expander("Options de téléchargement", expanded=False):
             st.markdown(
                 """
@@ -101,36 +97,36 @@ if uploaded_file is not None:
             )
             st.markdown('<div class="small-button">', unsafe_allow_html=True)
 
-            if 'modified_df' in st.session_state:
-                modified_json = st.session_state.modified_df.to_json(orient='records', indent=2)
-                modified_csv = st.session_state.modified_df.to_csv(index=False).encode('utf-8')
+            if not filtered_df.empty:
+                modified_json = filtered_df.to_json(orient='records', indent=2)
+                modified_csv = filtered_df.to_csv(index=False).encode('utf-8')
 
                 try:
                     buffer = io.BytesIO()
                     # Convertir explicitement les colonnes en types compatibles
-                    for col in st.session_state.modified_df.columns:
-                        if st.session_state.modified_df[col].dtype == 'object':
-                            st.session_state.modified_df[col] = st.session_state.modified_df[col].astype('string')
+                    for col in filtered_df.columns:
+                        if filtered_df[col].dtype == 'object':
+                            filtered_df[col] = filtered_df[col].astype('string')
 
-                    st.session_state.modified_df.to_parquet(buffer, index=False)
+                    filtered_df.to_parquet(buffer, index=False)
                     modified_parquet = buffer.getvalue()
 
                     st.download_button(
                         label="Télécharger en JSON",
                         data=modified_json,
-                        file_name="modified_data.json",
+                        file_name="filtered_data.json",
                         mime="application/json"
                     )
                     st.download_button(
                         label="Télécharger en CSV",
                         data=modified_csv,
-                        file_name="modified_data.csv",
+                        file_name="filtered_data.csv",
                         mime="text/csv"
                     )
                     st.download_button(
                         label="Télécharger en Parquet",
                         data=modified_parquet,
-                        file_name="modified_data.parquet",
+                        file_name="filtered_data.parquet",
                         mime="application/octet-stream"
                     )
                 except Exception as e:
