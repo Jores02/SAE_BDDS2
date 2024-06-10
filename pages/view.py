@@ -87,11 +87,15 @@ if uploaded_file is not None:
                     font-size: 0.8em !important;
                     padding: 0.25em 0.5em !important;
                 }
+                .horizontal {
+                    display: flex;
+                    justify-content: space-around;
+                }
                 </style>
                 """,
                 unsafe_allow_html=True
             )
-            st.markdown('<div class="small-button">', unsafe_allow_html=True)
+            st.markdown('<div class="small-button horizontal">', unsafe_allow_html=True)
 
             if not filtered_df.empty:
                 modified_json = filtered_df.to_json(orient='records', indent=2)
