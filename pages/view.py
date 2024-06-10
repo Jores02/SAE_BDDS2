@@ -1,8 +1,24 @@
 import streamlit as st
 import pandas as pd
 
-# Initialisation de st.session_state.df pour l'exemple
-if "df" not in st.session_state:
+# Fonction pour lire le fichier uploadé
+def load_data(file):
+    if file is not None:
+        try:
+            df = pd.read_csv(file)
+            return df
+        except Exception as e:
+            st.error(f"Erreur lors du chargement du fichier : {e}")
+            return None
+    return None
+
+# Charger le fichier uploadé et l'ajouter à st.session_state
+uploaded_file = st.file_uploader("Choisissez un fichier CSV", type=["csv"])
+if uploaded_file:
+    st.session_state.df = load_data(uploaded_file)
+
+# Initialiser un DataFrame par défaut pour l'exemple si aucun fichier n'est uploadé
+if "df" not in st.session_state or st.session_state.df is None:
     st.session_state.df = pd.DataFrame({
         "nom": ["Alice", "Bob", "Charlie"],
         "age": [25, 30, 35],
