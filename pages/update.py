@@ -43,9 +43,11 @@ if uploaded_file is not None:
         st.write('### DataFrame original :')
         st.dataframe(df)
 
-        # Initialisation de la liste des modifications
+        # Initialisation de la liste des modifications et des filtres
         if 'modifications' not in st.session_state:
             st.session_state.modifications = []
+        if 'filters' not in st.session_state:
+            st.session_state.filters = []
 
         # Charger le DataFrame modifié stocké dans session_state s'il existe
         if 'modified_df' in st.session_state:
@@ -210,3 +212,87 @@ if uploaded_file is not None:
                     st.error(f"Erreur lors de la conversion en Parquet: {e}")
 
             st.markdown('</div>', unsafe_allow_html=True)
+
+        # Fonction pour appliquer les filtres
+        def apply_filters(df, filters):
+            for column_name, condition, value in filters:
+                if condition == 'equals':
+                    df = df[df[column_name] == value]
+                elif condition == 'contains':
+                    df = df[df[column_name].str.contains(value, na=False)]
+                elif condition == 'greater_than':
+                    df = df[df[column_name] > value]
+                elif condition == 'less_than':
+                    df = df[df[column_name] < value]
+            return df
+
+        # Gestion des filtres
+        st.write('### Filtrer les données :')
+        with st.form(key='filter_form'):
+            column_name = st.selectbox('Colonne', df.columns, key='filter_column')
+            condition = st.selectbox('Condition', ['equals', 'contains', 'greater_than', 'less_than'], key='filter_condition')
+            value = st.text_input('Valeur', key='filter_value')
+            add_filter = st.form_submit_button('Ajouter le filtre')
+
+        if add_filter:
+            st.session_state.filters.append((column_name, condition, value))
+            st.experimental_rerun()
+
+        # Afficher les filtres en attente
+        st.write('### Filtres en attente :')
+        for i, f in enumerate(st.session_state.filters):
+            column_name, condition, value = f
+            col1, col2 = st.columns([3, 1])
+            with col1:
+                st.write(f"Colonne '{column_name}', Condition : {condition}, Valeur : {value}")
+            with col2:
+                if st.button('Supprimer', key=f'delete_filter_{i}'):
+                    st.session_state.filters.pop(i)
+                    st.experimental_rerun()
+
+        # Appliquer les filtres et afficher le DataFrame filtré
+        if st.button('Appliquer les filtres'):
+            filtered_df = apply_filters(df, st.session_state.filters)
+            st.write('### DataFrame après filtrage :')
+            st.dataframe(filtered_df)
+
+            # Sauvegarder le DataFrame filtré dans session_state
+            st.session_state.filtered_df = filtered_df
+
+        # Options pour télécharger les filtres
+        st.write('### Télécharger les filtres appliqués :')
+        with st.expander("Options de téléchargement des filtres", expanded=False):
+            if 'filtered_df' in st.session_state:
+                filtered_json = st.session_state.filtered_df.to_json(orient='records', indent=2)
+                filtered_csv = st.session_state.filtered_df.to_csv(index=False).encode('utf-8')
+
+                try:
+                    buffer = io.BytesIO()
+                    # Convertir explicitement les colonnes en types compatibles
+                    for col in st.session_state.filtered_df.columns:
+                        if st.session_state.filtered_df[col].dtype == 'object':
+                            st.session_state.filtered_df[col] = st.session_state.filtered_df[col].astype('string')
+
+                    st.session_state.filtered_df.to_parquet(buffer, index=False)
+                    filtered_parquet = buffer.getvalue()
+
+                    st.download_button(
+                        label="Télécharger en JSON",
+                        data=filtered_json,
+                        file_name="filtered_data.json",
+                        mime="application/json"
+                    )
+                    st.download_button(
+                        label="Télécharger en CSV",
+                        data=filtered_csv,
+                        file_name="filtered_data.csv",
+                        mime="text/csv"
+                    )
+                    st.download_button(
+                        label="Télécharger en Parquet",
+                        data=filtered_parquet,
+                        file_name="filtered_data.parquet",
+                        mime="application/octet-stream"
+                    )
+                except Exception as e:
+                    st.error(f"Erreur lors de la conversion en Parquet: {e}")
